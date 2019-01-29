@@ -46,6 +46,9 @@ int main(int argc, char *argv[])
             result = strtok(NULL, " ");
         }
 
+        printf("Command: %s\n", command);
+        printf("Args: %s\n", arg);
+
         // Check the command and execute the operations for each command
         // cd command -- change the current directory
         if (strcmp(command, "cd") == 0)
