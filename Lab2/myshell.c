@@ -49,22 +49,55 @@ int main(int argc, char *argv[])
         printf("Command: %s\n", command);
         printf("Args: %s\n", arg);
 
-        // Check the command and execute the operations for each command
-        // cd command -- change the current directory
+
+        // cd <directory> - Change the current default directory to
         if (strcmp(command, "cd") == 0)
         {
-            // your code here
+            
         }
 
-        // other commands here...
+        // clr - Clear the screen.
+        else if (strcmp(command, "clr") == 0)
+        {
+            
+        }
 
-        // quit command -- exit the shell
+        // dir <directory> - List the contents of directory <directory>.
+        else if (strcmp(command, "dir") == 0)
+        {
+            
+        }
+        
+        // environ - List all the environment strings.
+        else if (strcmp(command, "environ") == 0)
+        {
+            
+        }
+        
+        // echo <comment> - Display <comment> on the display followed by a
+        else if (strcmp(command, "echo") == 0)
+        {
+            printf("%s\n", arg);
+        }
+        
+        // help - Display the user manual using the more filter.
+        else if (strcmp(command, "help") == 0)
+        {
+            
+        }
+        
+        // pause - Pause operation of the shell until 'Enter' is pressed.
+        else if (strcmp(command, "pause") == 0)
+        {
+            
+        }
+    
         else if (strcmp(command, "quit") == 0)
         {
             return EXIT_SUCCESS;
         }
 
-        // Unsupported command
+       
         else
         {
             fputs("Unsupported command, use help to display the manual\n", stderr);
