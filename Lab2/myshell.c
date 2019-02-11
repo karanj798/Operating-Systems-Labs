@@ -14,14 +14,34 @@
 #include "utility.h"
 #include "myshell.h"
 
-// Put macros or constants here using #define
 #define BUFFER_LEN 256
 
-// Put global environment variables here
 
-// Define functions declared in myshell.h here
+void changeDIR(char *command, char *arg)
+{
+    getcwd(command, sizeof(command));
+    // Check for any argument
+    if (strcmp(arg, "") == 0)
+    {
+        printf("Still at current path.");
+    }
+    else
+    {
+        //Sets the environment variable
+        setenv("PWD", arg, 2);
+        //Checks if directory exists
+        if (chdir(getenv("PWD")) != 0)
+        {
+            printf("Directory Not Found.\n");
+        }
+        else
+        {
+            printf("Now at directory %s\n", getenv("PWD"));
+        }
+    }
+}
 
-int main(int argc, char *argv[])
+int main()
 {
     // Input buffer and and commands
     char buffer[BUFFER_LEN] = {0};
@@ -46,39 +66,31 @@ int main(int argc, char *argv[])
             result = strtok(NULL, " ");
         }
 
-        printf("Command: %s\n", command);
-        printf("Args: %s\n", arg);
-
 
         // cd <directory> - Change the current default directory to
         if (strcmp(command, "cd") == 0)
         {
-            
+            changeDIR(command, arg);
         }
-
-        // clr - Clear the screen.
+      
         else if (strcmp(command, "clr") == 0)
         {
-            
+            printf("\%c[2J", 033);
         }
-
-        // dir <directory> - List the contents of directory <directory>.
         else if (strcmp(command, "dir") == 0)
         {
-            
+
         }
-        
-        // environ - List all the environment strings.
         else if (strcmp(command, "environ") == 0)
         {
-            
+            system("printenv");
         }
-        
-        // echo <comment> - Display <comment> on the display followed by a
+
         else if (strcmp(command, "echo") == 0)
         {
-            printf("%s\n", arg);
+            printf("%s\n", "");
         }
+
         
         // help - Display the user manual using the more filter.
         else if (strcmp(command, "help") == 0)
