@@ -1,7 +1,7 @@
 /*
  * MyShell Project for SOFE 3950U / CSCI 3020U: Operating Systems
  *
- * Copyright (C) 2017, <GROUP MEMBERS>
+ * Copyright (C) 2017
  * All rights reserved.
  * 
  */
@@ -14,106 +14,40 @@
 #include "utility.h"
 #include "myshell.h"
 
+// Put macros or constants here using #define
 #define BUFFER_LEN 256
 
 
-void changeDIR(char *command, char *arg)
-{
-    getcwd(command, sizeof(command));
-    // Check for any argument
-    if (strcmp(arg, "") == 0)
-    {
-        printf("Still at current path.");
-    }
-    else
-    {
-        //Sets the environment variable
-        setenv("PWD", arg, 2);
-        //Checks if directory exists
-        if (chdir(getenv("PWD")) != 0)
-        {
-            printf("Directory Not Found.\n");
-        }
-        else
-        {
-            printf("Now at directory %s\n", getenv("PWD"));
-        }
-    }
-}
 
-int main()
+int main(int argc, char *argv[], char *envp[])
 {
-    // Input buffer and and commands
+
     char buffer[BUFFER_LEN] = {0};
     char command[BUFFER_LEN] = {0};
-    char arg[BUFFER_LEN] = {0};
-    char *result = NULL;
+    char arg[20][200] = {{0}};
+    printf("%s", buffer);
 
-    // Parse the commands provided using argc and argv
-
-    // Perform an infinite loop getting command input from users
+    print_prompt();
     while (fgets(buffer, BUFFER_LEN, stdin) != NULL)
     {
-        // Perform string tokenization to get the command and argument
-        result = strtok(buffer, " ");
-        strcpy(command, result);
-        result = strtok(NULL, " ");
+        if (strcmp(buffer, "\n"))
+        {
+            char *str = strtok(buffer, "\n");
+            char *com = strtok(str, " ");
+            char *tok = strtok(NULL, " ");
 
-        while (result != NULL)
-        {
-            strcat(arg, result);
-            strcat(arg, " ");
-            result = strtok(NULL, " ");
-        }
+            int count = 0;
+            while (tok != NULL)
+            {
+                strcpy(arg[count], tok);
+                tok = strtok(NULL, " ");
+                count++;
+            }
+            strcpy(command, com);
 
-
-        // cd <directory> - Change the current default directory to
-        if (strcmp(command, "cd") == 0)
-        {
-            changeDIR(command, arg);
-        }
-      
-        else if (strcmp(command, "clr") == 0)
-        {
-            printf("\%c[2J", 033);
-        }
-        else if (strcmp(command, "dir") == 0)
-        {
-
-        }
-        else if (strcmp(command, "environ") == 0)
-        {
-            system("printenv");
-        }
-
-        else if (strcmp(command, "echo") == 0)
-        {
-            printf("%s\n", "");
-        }
-
-        
-        // help - Display the user manual using the more filter.
-        else if (strcmp(command, "help") == 0)
-        {
             
         }
-        
-        // pause - Pause operation of the shell until 'Enter' is pressed.
-        else if (strcmp(command, "pause") == 0)
-        {
-            
-        }
-    
-        else if (strcmp(command, "quit") == 0)
-        {
-            return EXIT_SUCCESS;
-        }
-
-       
-        else
-        {
-            fputs("Unsupported command, use help to display the manual\n", stderr);
-        }
+        print_prompt();
     }
     return EXIT_SUCCESS;
 }
