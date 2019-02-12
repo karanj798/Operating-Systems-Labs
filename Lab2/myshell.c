@@ -51,3 +51,19 @@ int main(int argc, char *argv[], char *envp[])
     }
     return EXIT_SUCCESS;
 }
+void print_help()
+{
+    FILE *file;
+    file = fopen("readme", "r");
+    if (file == NULL)
+    {
+        printf("Cannot open file\n");
+    }
+    char c = fgetc(file);
+    while (c != EOF)
+    {
+        printf("%c", c);
+        c = fgetc(file);
+    }
+    fclose(file);
+}
