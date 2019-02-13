@@ -30,7 +30,66 @@ void change_dir(char arg[][200]);
 
 int main(int argc, char *argv[], char *envp[])
 {
-
+    FILE *fileout;
+    if (argc == 2)
+    {
+        fileout = freopen(argv[1], "r", stdin);
+        if (fileout == NULL)
+        {
+            printf("Cannot open file");
+        }
+    }
+    if (argc >= 3)
+    {
+        if ((strcmp(argv[1], ">") == 0))
+        { //output
+            fileout = freopen(argv[2], "w", stdout);
+            if (fileout == NULL)
+            {
+                printf("Cannot open file\n");
+            }
+        }
+        if ((strcmp(argv[1], ">>") == 0))
+        { //output ammend
+            fileout = freopen(argv[2], "a+", stdout);
+            if (fileout == NULL)
+            {
+                printf("Cannot open file\n");
+            }
+        }
+        if ((strcmp(argv[1], "<") == 0))
+        { //input
+            fileout = freopen(argv[2], "r", stdin);
+            if (fileout == NULL)
+            {
+                printf("Cannot open file\n");
+            }
+        }
+        if ((strcmp(argv[3], ">") == 0))
+        { //output
+            fileout = freopen(argv[4], "w", stdout);
+            if (fileout == NULL)
+            {
+                printf("Cannot open file\n");
+            }
+        }
+        if ((strcmp(argv[3], ">>") == 0))
+        { //output ammend
+            fileout = freopen(argv[4], "a+", stdout);
+            if (fileout == NULL)
+            {
+                printf("Cannot open file\n");
+            }
+        }
+        if ((strcmp(argv[3], "<") == 0))
+        { //input
+            fileout = freopen(argv[4], "r", stdin);
+            if (fileout == NULL)
+            {
+                printf("Cannot open file\n");
+            }
+        }
+    }
     char buffer[BUFFER_LEN] = {0};
     char command[BUFFER_LEN] = {0};
     char arg[20][200] = {{0}};
