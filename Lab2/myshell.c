@@ -1,7 +1,7 @@
 /*
  * MyShell Project for SOFE 3950U / CSCI 3020U: Operating Systems
  *
- * Copyright (C) 2017
+ * Copyright (C) 2018, Karan Jariwala (100619029), Harsh Patel (100580778), Aakash Patel (100616630), Karan Patel (100621178)
  * All rights reserved.
  * 
  */
@@ -30,6 +30,7 @@ void change_dir(char arg[][200]);
 
 int main(int argc, char *argv[], char *envp[])
 {
+    // File I/O
     FILE *fileout;
     if (argc == 2)
     {
@@ -39,63 +40,14 @@ int main(int argc, char *argv[], char *envp[])
             printf("Cannot open file");
         }
     }
-    if (argc >= 3)
-    {
-        if ((strcmp(argv[1], ">") == 0))
-        { //output
-            fileout = freopen(argv[2], "w", stdout);
-            if (fileout == NULL)
-            {
-                printf("Cannot open file\n");
-            }
-        }
-        if ((strcmp(argv[1], ">>") == 0))
-        { //output ammend
-            fileout = freopen(argv[2], "a+", stdout);
-            if (fileout == NULL)
-            {
-                printf("Cannot open file\n");
-            }
-        }
-        if ((strcmp(argv[1], "<") == 0))
-        { //input
-            fileout = freopen(argv[2], "r", stdin);
-            if (fileout == NULL)
-            {
-                printf("Cannot open file\n");
-            }
-        }
-        if ((strcmp(argv[3], ">") == 0))
-        { //output
-            fileout = freopen(argv[4], "w", stdout);
-            if (fileout == NULL)
-            {
-                printf("Cannot open file\n");
-            }
-        }
-        if ((strcmp(argv[3], ">>") == 0))
-        { //output ammend
-            fileout = freopen(argv[4], "a+", stdout);
-            if (fileout == NULL)
-            {
-                printf("Cannot open file\n");
-            }
-        }
-        if ((strcmp(argv[3], "<") == 0))
-        { //input
-            fileout = freopen(argv[4], "r", stdin);
-            if (fileout == NULL)
-            {
-                printf("Cannot open file\n");
-            }
-        }
-    }
+
     char buffer[BUFFER_LEN] = {0};
     char command[BUFFER_LEN] = {0};
     char arg[20][200] = {{0}};
-    printf("%s", buffer);
 
-    print_prompt();
+    print_prompt(); // Printing prompt
+
+    // Perform an infinite loop getting command input from users
     while (fgets(buffer, BUFFER_LEN, stdin) != NULL)
     {
         if (strcmp(buffer, "\n"))
@@ -113,7 +65,8 @@ int main(int argc, char *argv[], char *envp[])
             }
             strcpy(command, com);
 
-            // cd command -- change the current directory
+            // Checking which commands are inputted
+
             if (strcmp(command, "cd") == 0)
             {
                 change_dir(arg);
@@ -160,12 +113,10 @@ int main(int argc, char *argv[], char *envp[])
             {
                 print_help();
             }
-
             else if (strcmp(command, "quit") == 0)
             {
                 return EXIT_SUCCESS;
             }
-
             else
             {
                 fputs("Unsupported command, use help to display the manual\n", stderr);
@@ -173,13 +124,14 @@ int main(int argc, char *argv[], char *envp[])
         }
         print_prompt();
     }
+    fclose(fileout);
     return EXIT_SUCCESS;
 }
 
 void print_pwd()
 {
     getcwd(PWD, sizeof(PWD));
-    printf("%s\n", PWD);
+    printf("\n%s\n", PWD);
 }
 
 void print_prompt()

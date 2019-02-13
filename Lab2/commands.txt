@@ -1,0 +1,4 @@
+help
+cd test
+pwd
+dir
