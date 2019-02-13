@@ -14,6 +14,7 @@
 #include "utility.h"
 #include "myshell.h"
 
+// Put macros or constants here using #define
 #define BUFFER_LEN 256
 
 // Put global environment variables here
@@ -157,7 +158,6 @@ void change_dir(char arg[][200])
     }
     print_pwd();
 }
-
 void print_help()
 {
     FILE *file;
