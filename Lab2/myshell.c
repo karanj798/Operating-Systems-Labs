@@ -1,7 +1,7 @@
 /*
  * MyShell Project for SOFE 3950U / CSCI 3020U: Operating Systems
  *
- * Copyright (C) 2017, <GROUP MEMBERS>
+ * Copyright (C) 2017
  * All rights reserved.
  * 
  */
@@ -16,104 +16,161 @@
 
 #define BUFFER_LEN 256
 
+// Put global environment variables here
+char PWD[256] = ".";
+char SHELL[256];
 
-void changeDIR(char *command, char *arg)
+// Defining couple of myshell functions
+void print_pwd();
+void print_prompt();
+void print_dir();
+void print_help();
+void change_dir(char arg[][200]);
+
+int main(int argc, char *argv[], char *envp[])
 {
-    getcwd(command, sizeof(command));
-    // Check for any argument
-    if (strcmp(arg, "") == 0)
+
+    char buffer[BUFFER_LEN] = {0};
+    char command[BUFFER_LEN] = {0};
+    char arg[20][200] = {{0}};
+    printf("%s", buffer);
+
+    print_prompt();
+    while (fgets(buffer, BUFFER_LEN, stdin) != NULL)
     {
-        printf("Still at current path.");
+        if (strcmp(buffer, "\n"))
+        {
+            char *str = strtok(buffer, "\n");
+            char *com = strtok(str, " ");
+            char *tok = strtok(NULL, " ");
+
+            int count = 0;
+            while (tok != NULL)
+            {
+                strcpy(arg[count], tok);
+                tok = strtok(NULL, " ");
+                count++;
+            }
+            strcpy(command, com);
+
+            // cd command -- change the current directory
+            if (strcmp(command, "cd") == 0)
+            {
+                change_dir(arg);
+            }
+            else if (strcmp(command, "pwd") == 0)
+            {
+                print_pwd();
+            }
+            else if (strcmp(command, "clr") == 0)
+            {
+                printf("\%c[2J", 033);
+            }
+            else if (strcmp(command, "dir") == 0)
+            {
+                print_dir();
+            }
+            else if (strcmp(command, "pause") == 0)
+            {
+                printf("Press ENTER to continue");
+                char d;
+                d = getchar();
+                while (d != 0x0A)
+                {
+                    d = getchar();
+                }
+            }
+            else if (strcmp(command, "environ") == 0)
+            {
+                for (char **env = envp; *env != 0; env++)
+                {
+                    char *thisEnv = *env;
+                    printf("%s\n", thisEnv);
+                }
+            }
+            else if (strcmp(command, "echo") == 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    printf("%s ", arg[i]);
+                }
+                printf("\n");
+            }
+            else if (strcmp(command, "help") == 0)
+            {
+                print_help();
+            }
+
+            else if (strcmp(command, "quit") == 0)
+            {
+                return EXIT_SUCCESS;
+            }
+
+            else
+            {
+                fputs("Unsupported command, use help to display the manual\n", stderr);
+            }
+        }
+        print_prompt();
     }
-    else
+    return EXIT_SUCCESS;
+}
+
+void print_pwd()
+{
+    getcwd(PWD, sizeof(PWD));
+    printf("%s\n", PWD);
+}
+
+void print_prompt()
+{
+    getcwd(PWD, sizeof(PWD));
+    char *shl = strcat(PWD, "/myshell $ ");
+    strcpy(SHELL, shl);
+    printf("%s", SHELL);
+}
+
+void print_dir()
+{
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(".");
+    if (d)
     {
-        //Sets the environment variable
-        setenv("PWD", arg, 2);
-        //Checks if directory exists
-        if (chdir(getenv("PWD")) != 0)
+        while ((dir = readdir(d)) != NULL)
         {
-            printf("Directory Not Found.\n");
+            printf("%s\n", dir->d_name);
         }
-        else
-        {
-            printf("Now at directory %s\n", getenv("PWD"));
-        }
+        closedir(d);
     }
 }
 
-int main()
+void change_dir(char arg[][200])
 {
-    // Input buffer and and commands
-    char buffer[BUFFER_LEN] = {0};
-    char command[BUFFER_LEN] = {0};
-    char arg[BUFFER_LEN] = {0};
-    char *result = NULL;
-
-    // Parse the commands provided using argc and argv
-
-    // Perform an infinite loop getting command input from users
-    while (fgets(buffer, BUFFER_LEN, stdin) != NULL)
+    if (strcmp(arg[0], "cd ") != 0)
     {
-        // Perform string tokenization to get the command and argument
-        result = strtok(buffer, " ");
-        strcpy(command, result);
-        result = strtok(NULL, " ");
-
-        while (result != NULL)
+        if (chdir(arg[0]) == -1)
         {
-            strcat(arg, result);
-            strcat(arg, " ");
-            result = strtok(NULL, " ");
-        }
-
-
-        // cd <directory> - Change the current default directory to
-        if (strcmp(command, "cd") == 0)
-        {
-            changeDIR(command, arg);
-        }
-      
-        else if (strcmp(command, "clr") == 0)
-        {
-            printf("\%c[2J", 033);
-        }
-        else if (strcmp(command, "dir") == 0)
-        {
-
-        }
-        else if (strcmp(command, "environ") == 0)
-        {
-            system("printenv");
-        }
-
-        else if (strcmp(command, "echo") == 0)
-        {
-            printf("%s\n", "");
-        }
-
-        
-        // help - Display the user manual using the more filter.
-        else if (strcmp(command, "help") == 0)
-        {
-            
-        }
-        
-        // pause - Pause operation of the shell until 'Enter' is pressed.
-        else if (strcmp(command, "pause") == 0)
-        {
-            
-        }
-    
-        else if (strcmp(command, "quit") == 0)
-        {
-            return EXIT_SUCCESS;
-        }
-
-       
-        else
-        {
-            fputs("Unsupported command, use help to display the manual\n", stderr);
+            perror(arg[0]);
+            printf("Please enter a valid directory \n");
         }
     }
-    return EXIT_SUCCESS;
+    print_pwd();
+}
+
+void print_help()
+{
+    FILE *file;
+    file = fopen("readme", "r");
+    if (file == NULL)
+    {
+        printf("Cannot open file\n");
+    }
+    char c = fgetc(file);
+    while (c != EOF)
+    {
+        printf("%c", c);
+        c = fgetc(file);
+    }
+    fclose(file);
 }
