@@ -65,7 +65,7 @@ int main(int argc, char *argv[], char *envp[])
             }
             else if (strcmp(command, "clr") == 0)
             {
-                printf("\%c[2J", 033);
+                printf("\033[H\033[J");
             }
             else if (strcmp(command, "dir") == 0)
             {
@@ -158,6 +158,7 @@ void change_dir(char arg[][200])
     }
     print_pwd();
 }
+
 void print_help()
 {
     FILE *file;

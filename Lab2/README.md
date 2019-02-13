@@ -1,14 +1,22 @@
 # Lab 2
 
-# Commands
-chdir - changes the directory
-exit - exits the programs
-
-# Installation
+# Usage
 ``` 
-$ git clone https://github.com/karanj798/SOFE3950-labs.git
-cd Lab2
-make mysehell
-./myshell
-[COMMANDS HERE] [ARGS HERE]
+$ make
+$ ./myshell 
+/SOFE3950-labs/Lab2/myshell $ cd <directory>
+/SOFE3950-labs/Lab2/myshell $ clr
+/SOFE3950-labs/Lab2/myshell $ dir
+/SOFE3950-labs/Lab2/myshell $ environ
+/SOFE3950-labs/Lab2/myshell $ echo <msg_here>
+/SOFE3950-labs/Lab2/myshell $ help
+/SOFE3950-labs/Lab2/myshell $ quit
+```
+## I/O Redirection
+```
+$ make
+$ ./myshell < [input.txt] 
+$ ./myshell > [out.txt] 
+$ ./myshell < [input.txt] > [out.txt] 
+$ cat input.txt | ./myshell
 ```
