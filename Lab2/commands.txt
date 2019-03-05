@@ -1,1 +1,7 @@
 help
+<<<<<<< HEAD
+=======
+cd test
+pwd
+dir
+>>>>>>> 9dc9eaf5ad5b871cc160e33939c43fac58cc26b7
