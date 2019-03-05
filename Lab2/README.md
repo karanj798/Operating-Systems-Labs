@@ -1,5 +1,8 @@
 # Lab 2
 
+# Note
+Please don't use an input file that is made on Windows. There are issues when reading the file, something to do with file encoding 🤔🤔.
+
 # Usage
 ``` 
 $ make
@@ -15,8 +18,8 @@ $ ./myshell
 ## I/O Redirection
 ```
 $ make
-$ ./myshell < [input.txt] 
-$ ./myshell > [out.txt] 
-$ ./myshell < [input.txt] > [out.txt] 
-$ cat input.txt | ./myshell
+$ ./myshell < commands.txt 
+$ ./myshell > out.txt 
+$ ./myshell < commands.txt > out.txt 
+$ cat commands.txt | ./myshell > out.txt
 ```
