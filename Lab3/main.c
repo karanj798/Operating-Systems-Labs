@@ -5,7 +5,7 @@
 #include <pthread.h>
 
 int sudoku[9][9];
-bool row_invalid;
+bool row_invalid = false, col_invalid = false;
 
 void *validate_row(void *param)
 {
@@ -16,14 +16,18 @@ void *validate_row(void *param)
         int temp_row[9] = {0};
         for (int j = 0; j < 9; j++)
         {
-            if (temp_row[sudoku[i][j] - 1] == 0)
+            if (sudoku[i][j] != 0)
             {
-                temp_row[sudoku[i][j] - 1] = 1;
-            }
-            else
-            {
-                row_invalid = true;
-                break;
+                if (temp_row[sudoku[i][j] - 1] == 0)
+                {
+                    temp_row[sudoku[i][j] - 1] = 1;
+                }
+                else
+                {
+                    printf("row: %d\n", (sudoku[i][j] - 1));
+                    row_invalid = true;
+                    break;
+                }
             }
         }
     }
@@ -37,14 +41,18 @@ void *validate_col()
         int temp_row[9] = {0};
         for (int i = 0; i < 9; i++)
         {
-            if (temp_row[sudoku[i][j] - 1] == 0)
+            if (sudoku[i][j] != 0)
             {
-                temp_row[sudoku[i][j] - 1] = 1;
-            }
-            else
-            {
-                row_invalid = true;
-                break;
+                if (temp_row[sudoku[i][j] - 1] == 0)
+                {
+                    temp_row[sudoku[i][j] - 1] = 1;
+                }
+                else
+                {
+                    printf("col: %d\n", (sudoku[i][j] - 1));
+                    col_invalid = true;
+                    break;
+                }
             }
         }
     }
@@ -103,5 +111,24 @@ int main()
     {
         printf("Thread Error occurred.\n");
         exit(0);
+    }
+
+    if (pthread_join(t_row, NULL))
+    {
+        printf("Thread join Error\n");
+    }
+
+    if (pthread_join(t_col, NULL))
+    {
+        printf("Thread join Error\n");
+    }
+
+    if (row_invalid || col_invalid)
+    {
+        printf("Invalid board.\n");
+    }
+    else
+    {
+        printf("Valid board.\n");
     }
 }
