@@ -6,66 +6,62 @@
 
 int sudoku[9][9];
 bool row_invalid = false, col_invalid = false;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void *validate_row(void *param)
+int curr_row;
+int row_sum;
+
+struct index
 {
-    //TODO: Use the logic of counting sort.
+    int i;
+    int j;
+};
+
+void *solve_row()
+{
+    pthread_mutex_lock(&mutex);
+
+    struct index missing_index;
+
+    for (int j = 0; j < 9; j++)
+    {
+        printf("Row: %d, Col:%d, elem: %d\n", curr_row, j, sudoku[curr_row][j]);
+        row_sum += sudoku[curr_row][j];
+        if (sudoku[curr_row][j] == 0)
+        {
+            missing_index.i = curr_row;
+            missing_index.j = j;
+        }
+    }
+
+    printf("Row: %d, Sum: %d\n", curr_row, row_sum);
+    printf("Missing: %d @ %d, %d\n", (45 - row_sum), missing_index.i, missing_index.j);
+    printf("--------------------\n");
+    sudoku[missing_index.i][missing_index.j] = 45 - row_sum;
+    curr_row += 1;
+    row_sum = 0;
+    pthread_mutex_unlock(&mutex);
+    pthread_exit(NULL);
+}
+
+void print_board()
+{
+    printf("+++++++++++++++++++++++++++++++++++++\n");
 
     for (int i = 0; i < 9; i++)
     {
-        int temp_row[9] = {0};
+        printf("|");
         for (int j = 0; j < 9; j++)
         {
-            if (sudoku[i][j] != 0)
-            {
-                if (temp_row[sudoku[i][j] - 1] == 0)
-                {
-                    temp_row[sudoku[i][j] - 1] = 1;
-                }
-                else
-                {
-                    printf("row: %d\n", (sudoku[i][j] - 1));
-                    row_invalid = true;
-                    break;
-                }
-            }
+
+            printf(" %d |", sudoku[i][j]);
         }
+        printf("\n+++++++++++++++++++++++++++++++++++++\n");
     }
-    pthread_exit(NULL);
 }
 
-void *validate_col()
+void parse_puzzel()
 {
-    for (int j = 0; j < 9; j++)
-    {
-        int temp_row[9] = {0};
-        for (int i = 0; i < 9; i++)
-        {
-            if (sudoku[i][j] != 0)
-            {
-                if (temp_row[sudoku[i][j] - 1] == 0)
-                {
-                    temp_row[sudoku[i][j] - 1] = 1;
-                }
-                else
-                {
-                    printf("col: %d\n", (sudoku[i][j] - 1));
-                    col_invalid = true;
-                    break;
-                }
-            }
-        }
-    }
-    pthread_exit(NULL);
-}
-
-void *validate_box()
-{
-}
-
-int main()
-{
-
     char board[9][9];
 
     FILE *fpt;
@@ -74,61 +70,41 @@ int main()
     if (fpt == NULL)
     {
         printf("File not found");
-        return 0;
+        return;
     }
     for (int i = 0; i < 9; i++)
     {
         for (int j = 0; j < 9; j++)
         {
             fscanf(fpt, " %c ", &board[i][j]);
-        }
-    }
-
-    for (int i = 0; i < 9; i++)
-    {
-        for (int j = 0; j < 9; j++)
-        {
             if (board[i][j] == '-')
             {
                 board[i][j] = '0';
             }
             sudoku[i][j] = board[i][j] - '0';
-            printf("%d", sudoku[i][j]);
         }
-        printf("\n");
     }
-
     fclose(fpt);
+}
 
-    pthread_t t_row, t_col, t_box;
-    if (pthread_create(&t_row, NULL, validate_row, NULL))
+int main()
+{
+    parse_puzzel();
+    pthread_t t_row[9],
+        t_col, t_box;
+    for (int i = 0; i < 9; i++)
     {
-        printf("Thread Error occurred.\n");
-        exit(0);
-    }
-
-    if (pthread_create(&t_col, NULL, validate_col, NULL))
-    {
-        printf("Thread Error occurred.\n");
-        exit(0);
-    }
-
-    if (pthread_join(t_row, NULL))
-    {
-        printf("Thread join Error\n");
+        if (pthread_create(&t_row[i], NULL, *solve_row, NULL))
+        {
+            printf("Thread Error occurred.\n");
+            exit(0);
+        }
     }
 
-    if (pthread_join(t_col, NULL))
+    for (int i = 0; i < 9; i++)
     {
-        printf("Thread join Error\n");
+        pthread_join(t_row[i], NULL);
     }
 
-    if (row_invalid || col_invalid)
-    {
-        printf("Invalid board.\n");
-    }
-    else
-    {
-        printf("Valid board.\n");
-    }
+    print_board();
 }
