@@ -5,6 +5,9 @@
  * All rights reserved.
  * 
  */
+#include <sys/types.h>
+#include <stdbool.h>
+
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
@@ -18,8 +21,15 @@
 //  ...
 // } resources;
 
-
-// Processes structure containing all of the process details parsed from the 
+typedef struct
+{
+    int printers;
+    int scanners;
+    int modems;
+    int cds;
+    int mem[MEMORY];
+} resources_t;
+// Processes structure containing all of the process details parsed from the
 // input file, should also include the memory address (an index) which indicates
 // where in the resources memory array its memory was allocated
 // typedef struct {
@@ -27,23 +37,40 @@
 //  ...
 // } process;
 
+typedef struct
+{
+    // Parsed data
+    int arr_time;
+    int priority;
+    int proc_time;
+    int mem_size;
+    int printers;
+    int scanners;
+    int modems;
+    int cds;
 
-// Include your relevant functions declarations here they must start with the 
-// extern keyword such as in the following examples:
+    // Conventional tinggs
+    pid_t pid;
+    int mem_addr;
+    int suspend_status;
+    int running_status;
 
-// Function to allocate a contiguous chunk of memory in your resources structure
-// memory array, always make sure you leave the last 64 values (64 MB) free, should
-// return the index where the memory was allocated at
-// extern int alloc_mem(resources res, int size);
+} process_t;
 
-// Function to free the allocated contiguous chunk of memory in your resources
-// structure memory array, should take the resource struct, start index, and 
-// size (amount of memory allocated) as arguments
-// extern free_mem(resources res, int index, int size);
+typedef struct
+{
+    struct node_t *queue_real_time;
+    struct node_t *queues[3];
+} dispatcher_t;
 
-// Function to parse the file and initialize each process structure and add
-// it to your job dispatch list queue (linked list)
-// extern void load_dispatch(char *dispatch_file, node_t *queue);
+extern int mem_avail(resources_t *resources, int size, bool realtime);
+extern void mem_alloc(resources_t *resources, int loc, int size);
+extern void mem_free(resources_t *resources, int loc, int size);
 
+extern bool device_avail(pid_t *devices, int size, int count);
+extern void device_alloc(pid_t *devices, int size, int count, pid_t pid);
+extern void device_free(pid_t *devices, int size, pid_t pid);
+
+extern void dispatch_proc(dispatcher_t *dispatcher);
 
 #endif /* UTILITY_H_ */
