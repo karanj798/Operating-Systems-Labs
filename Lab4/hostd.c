@@ -49,26 +49,21 @@ bool run_dispatcher(dispatcher_t *dispatcher, resources_t *resources, int queue_
     node_t **head;
     if (queue_index == -1)
     {
-        // Real time queue
         head = &dispatcher->queue_real_time;
     }
     else
     {
-        // Priority queue
         head = &dispatcher->queues[queue_index];
     }
 
     if (*head != NULL)
     {
-        // Get a process
         proc_t p = pop(head);
 
-        // Check if the process is already running and is suspended
         if (p.running && p.suspended)
         {
             printf("Process %d was suspended\r\n", p.pid);
 
-            // Signal continue
             kill(p.pid, SIGCONT);
             waitpid(p.pid, NULL, WCONTINUED);
         }
@@ -96,7 +91,14 @@ bool run_dispatcher(dispatcher_t *dispatcher, resources_t *resources, int queue_
                 if (!device_avail(resources->printers, PRINTER_COUNT, p.printers))
                 {
                     printf("Insufficient Printers...\r\n");
-                    push(head, p);
+                    if (queue_index != 2)
+                    {
+                        push(&dispatcher->queues[queue_index + 1], p);
+                    }
+                    else
+                    {
+                        push(&dispatcher->queues[queue_index], p);
+                    }
 
                     return false;
                 }
@@ -104,7 +106,14 @@ bool run_dispatcher(dispatcher_t *dispatcher, resources_t *resources, int queue_
                 if (!device_avail(resources->scanners, SCANNER_COUNT, p.scanners))
                 {
                     printf("Insufficient Scanners...\r\n");
-                    push(head, p);
+                    if (queue_index != 2)
+                    {
+                        push(&dispatcher->queues[queue_index + 1], p);
+                    }
+                    else
+                    {
+                        push(&dispatcher->queues[queue_index], p);
+                    }
 
                     return false;
                 }
@@ -112,7 +121,14 @@ bool run_dispatcher(dispatcher_t *dispatcher, resources_t *resources, int queue_
                 if (!device_avail(resources->modems, MODEM_COUNT, p.modems))
                 {
                     printf("Insufficient Modems...\r\n");
-                    push(head, p);
+                    if (queue_index != 2)
+                    {
+                        push(&dispatcher->queues[queue_index + 1], p);
+                    }
+                    else
+                    {
+                        push(&dispatcher->queues[queue_index], p);
+                    }
 
                     return false;
                 }
@@ -120,7 +136,14 @@ bool run_dispatcher(dispatcher_t *dispatcher, resources_t *resources, int queue_
                 if (!device_avail(resources->cds, CD_COUNT, p.cds))
                 {
                     printf("Insufficient CDs...\r\n");
-                    push(head, p);
+                    if (queue_index != 2)
+                    {
+                        push(&dispatcher->queues[queue_index + 1], p);
+                    }
+                    else
+                    {
+                        push(&dispatcher->queues[queue_index], p);
+                    }
 
                     return false;
                 }
@@ -186,10 +209,8 @@ bool run_dispatcher(dispatcher_t *dispatcher, resources_t *resources, int queue_
                 sleep(PRIORITY_PROCESSOR_TIME);
                 kill(pid, SIGSTOP);
 
-                // Lower processor time
                 p.processor_time -= PRIORITY_PROCESSOR_TIME;
 
-                // Set as suspended
                 p.suspended = true;
 
                 // Requeue depending on if a process is waiting to be executed
