@@ -1,10 +1,11 @@
 /*
  * Host Dispatcher Shell Project for SOFE 3950U / CSCI 3020U: Operating Systems
  *
- * Copyright (C) 2015, <GROUP MEMBERS>
+ * Copyright (C) 2018, Karan Jariwala (100619029), Harsh Patel (100580778), Aakash Patel (100616630), Karan Patel (100621178)
  * All rights reserved.
  * 
  */
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
