@@ -1,17 +1,12 @@
-/*
- * Host Dispatcher Shell Project for SOFE 3950U / CSCI 3020U: Operating Systems
- *
- * Copyright (C) 2015, <GROUP MEMBERS>
- * All rights reserved.
- * 
- */
-#include <sys/types.h>
-#include <stdbool.h>
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
-// The amount of available memory
-#define MEMORY 1024
+#include <stdbool.h>
+#include <sys/types.h>
+
+#define BUFFER_SIZE 256
+
+#define MEMORY_SIZE 1024
 #define REALTIME_MEMORY_SIZE 64
 
 #define PRINTER_COUNT 2
@@ -22,59 +17,60 @@
 #define PRIORITY_QUEUE_COUNT 3
 #define PRIORITY_REALTIME 0
 #define PRIORITY_PROCESSOR_TIME 1
-// Resources structure containing integers for each resource constraint and an
-// array of 1024 for the memory
-// typedef struct {
-//  ...
-//  ...
-// } resources;
+
+#define DISPATCHER_JOB_LIMIT 100
+
+// Forward declarations
+struct node_t;
 
 typedef struct
 {
-    /*int printers;
-    int scanners;
-    int modems;
-    int cds;*/
+    char memory[MEMORY_SIZE];
     pid_t printers[PRINTER_COUNT];
     pid_t scanners[SCANNER_COUNT];
     pid_t modems[MODEM_COUNT];
     pid_t cds[CD_COUNT];
-    int mem[MEMORY];
 } resources_t;
-// Processes structure containing all of the process details parsed from the
-// input file, should also include the memory address (an index) which indicates
-// where in the resources memory array its memory was allocated
-// typedef struct {
-//  ...
-//  ...
-// } process;
 
 typedef struct
 {
-    // Parsed data
-    int arr_time;
+    // Process information
+    char name[BUFFER_SIZE];
+    int arrival_time;
     int priority;
-    int proc_time;
-    int mem_size;
+    int processor_time;
+    int memory;
     int printers;
     int scanners;
     int modems;
     int cds;
 
-    // Conventional tinggs
-    pid_t pid;
-    int mem_addr;
-    int suspend_status;
-    int running_status;
+    // Resources used by the processes
+    int address;
 
-} process_t;
+    // State information
+    pid_t pid;
+    bool running;
+    bool suspended;
+} proc_t;
 
 typedef struct
 {
     struct node_t *queue_real_time;
-    struct node_t *queues[3];
+    struct node_t *queues[PRIORITY_QUEUE_COUNT];
 } dispatcher_t;
 
+typedef struct queue_node_t
+{
+    proc_t process;
+    struct queue_node_t *next;
+} node_t;
+
+// queue functions
+extern void push(node_t **head, proc_t process);
+extern proc_t pop(node_t **head);
+
+// mem/dev functions
 extern int mem_avail(resources_t *resources, int size, bool realtime);
 extern void mem_alloc(resources_t *resources, int loc, int size);
 extern void mem_free(resources_t *resources, int loc, int size);
@@ -83,7 +79,7 @@ extern bool device_avail(pid_t *devices, int size, int count);
 extern void device_alloc(pid_t *devices, int size, int count, pid_t pid);
 extern void device_free(pid_t *devices, int size, pid_t pid);
 
-extern void dispatch_proc(dispatcher_t *dispatcher);
-extern bool dispatcher_tick(dispatcher_t *dispatcher, resources_t *resources);
-extern bool dispatcher_queue_execute(dispatcher_t *dispatcher, resources_t *resources, int queue_index);
-#endif /* UTILITY_H_ */
+// helper function
+extern bool load_dispatcher(dispatcher_t *dispatcher);
+
+#endif
