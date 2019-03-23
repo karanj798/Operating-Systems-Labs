@@ -14,9 +14,9 @@
 // perhaps make a clean bank structure instead of several arrays...
 
 // Request resources, returns true if successful
-extern bool request_res(int n_customer, int request[]);
+extern bool request_res(int n_customer);
 
 // Release resources, returns true if successful
-extern bool release_res(int n_customer, int release[]);
+extern void release_res(int n_customer);
 
 #endif /* BANKER_H_ */
