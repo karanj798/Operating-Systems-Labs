@@ -1,197 +1,12 @@
 /*
  * Banker's Algorithm for SOFE 3950U / CSCI 3020U: Operating Systems
  *
- * Copyright (C) 2015, <GROUP MEMBERS>
+ * Copyright (C) 2018, Karan Jariwala (100619029), Harsh Patel (100580778), Aakash Patel (100616630), Karan Patel (100621178)
  * All rights reserved.
  * 
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <unistd.h>
+
 #include "banker.h"
-
-// Put any other macros or constants here using #define
-// May be any values >= 0
-#define NUM_CUSTOMERS 5
-#define NUM_RESOURCES 3
-
-// Put global environment variables here
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex_res = PTHREAD_MUTEX_INITIALIZER;
-
-// Available amount of each resource
-int available[NUM_RESOURCES];
-int total_matrix[NUM_RESOURCES];
-int initial_matrix[NUM_CUSTOMERS][NUM_RESOURCES];
-int current_resource[NUM_RESOURCES];
-
-// Maximum demand of each customer
-int maximum[NUM_CUSTOMERS][NUM_RESOURCES];
-
-// Amount currently allocated to each customer
-int allocation[NUM_CUSTOMERS][NUM_RESOURCES];
-
-// Remaining need of each customer
-int need[NUM_CUSTOMERS][NUM_RESOURCES];
-
-// Define functions declared in banker.h here
-bool request_res(int n_customer)
-{
-    bool flag = true;
-    for (int i = 0; i < NUM_RESOURCES; i++)
-    {
-        flag = flag && (need[n_customer][i] < available[i]);
-    }
-    if (flag)
-    {
-        for (int i = 0; i < NUM_RESOURCES; i++)
-        {
-            available[i] = available[i] - need[n_customer][i];
-        }
-        pthread_mutex_lock(&mutex_res);
-        printf("Customer: %d\n-------------\n", n_customer);
-        printf("\tRequest\t\tAvailable\tState\n\t");
-        for (int i = 0; i < NUM_RESOURCES; i++)
-        {
-            printf("%d ", need[n_customer][i]);
-        }
-        printf("\t\t");
-        for (int i = 0; i < NUM_RESOURCES; i++)
-        {
-            printf("%d ", available[i]);
-        }
-        printf("\t\tSafe\nRequest Granted.\n\n");
-        sleep(1);
-        pthread_mutex_unlock(&mutex_res);
-        return true;
-    }
-    else
-    {
-        pthread_mutex_lock(&mutex_res);
-        printf("Customer: %d\n-------------\n", n_customer);
-        printf("\tRequest\t\tAvailable\tState\n\t");
-        for (int i = 0; i < NUM_RESOURCES; i++)
-        {
-            printf("%d ", need[n_customer][i]);
-        }
-        printf("\t\t");
-        for (int i = 0; i < NUM_RESOURCES; i++)
-        {
-            printf("%d ", available[i]);
-        }
-        printf("\t\tNot Safe\nRequest Denied.\n\n");
-        sleep(1);
-        pthread_mutex_unlock(&mutex_res);
-        return false;
-    }
-}
-
-// Release resources, returns true if successful
-void release_res(int n_customer)
-{
-    pthread_mutex_lock(&mutex_res);
-    for (int i = 0; i < NUM_RESOURCES; i++)
-    {
-        available[i] = available[i] + need[n_customer][i];
-    }
-    printf("Customer: %d\n-------------\n", n_customer);
-    printf("\tRelease\t\tAvailable\n\t");
-    for (int i = 0; i < NUM_RESOURCES; i++)
-    {
-        printf("%d ", need[n_customer][i]);
-    }
-    printf("\t\t");
-    for (int i = 0; i < NUM_RESOURCES; i++)
-    {
-        printf("%d ", available[i]);
-    }
-    printf("\n\n");
-    pthread_mutex_unlock(&mutex_res);
-}
-void generate_grid()
-{
-    for (int i = 0; i < NUM_CUSTOMERS; i++)
-    {
-        for (int j = 0; j < NUM_RESOURCES; j++)
-        {
-            maximum[i][j] = rand() % available[j];
-        }
-    }
-}
-
-void generate_allocate_matrix()
-{
-    for (int i = 0; i < NUM_CUSTOMERS; i++)
-    {
-        for (int j = 0; j < NUM_RESOURCES; j++)
-        {
-            if (maximum[i][j] == 0)
-            {
-                allocation[i][j] = 0;
-            }
-            else
-            {
-                allocation[i][j] = rand() % maximum[i][j];
-            }
-        }
-    }
-}
-
-void print_matrix(int arr[NUM_CUSTOMERS][NUM_RESOURCES])
-{
-    for (int i = 0; i < NUM_CUSTOMERS; i++)
-    {
-        for (int j = 0; j < NUM_RESOURCES; j++)
-        {
-            printf("%d ", arr[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-void subtractor()
-{
-    for (int i = 0; i < NUM_CUSTOMERS; i++)
-    {
-        for (int j = 0; j < NUM_RESOURCES; j++)
-        {
-            need[i][j] = maximum[i][j] - allocation[i][j];
-        }
-    }
-}
-
-void *thread_runner(void *params)
-{
-    bool flag = false;
-    int id = *(int *)params;
-
-    while (!flag)
-    {
-        pthread_mutex_lock(&mutex);
-        if (request_res(id))
-        {
-            flag = true;
-        }
-        pthread_mutex_unlock(&mutex);
-
-        sleep(2);
-        pthread_mutex_lock(&mutex);
-        if (flag)
-        {
-            release_res(id);
-        }
-        pthread_mutex_unlock(&mutex);
-
-        if (flag)
-        {
-            pthread_exit(NULL);
-        }
-    }
-    pthread_exit(NULL);
-}
 
 int main(int argc, char *argv[])
 {
@@ -203,7 +18,7 @@ int main(int argc, char *argv[])
     }
     srand(time(NULL));
 
-    for (int i = 0; i < argc - 1; i++)
+    for (int i = 0; i < 3; i++)
     {
         available[i] = atoi(argv[i + 1]);
     }
@@ -239,4 +54,157 @@ int main(int argc, char *argv[])
     }
 
     return EXIT_SUCCESS;
+} // Release resources, returns true if successful
+
+void *thread_runner(void *params)
+{
+    bool flag = false;
+    int id = *(int *)params;
+
+    while (!flag)
+    {
+        pthread_mutex_lock(&mutex);
+        if (request_res(id))
+        {
+            flag = true;
+        }
+        pthread_mutex_unlock(&mutex);
+
+        sleep(2); //needed to address all the requests before releasing resources.
+
+        pthread_mutex_lock(&mutex);
+        if (flag)
+        {
+            release_res(id);
+        }
+        pthread_mutex_unlock(&mutex);
+
+        if (flag)
+        {
+            pthread_exit(NULL);
+        }
+    }
+    pthread_exit(NULL);
+}
+
+bool request_res(int n_customer)
+{
+    bool flag = true;
+    for (int i = 0; i < NUM_RESOURCES; i++)
+    {
+        flag = flag && (need[n_customer][i] < available[i]);
+    }
+    pthread_mutex_lock(&mutex_res);
+    printf("Customer: %d\n-------------\n", n_customer + 1);
+    printf("\tRequest\t\tAvailable\tState\n\t");
+    pthread_mutex_unlock(&mutex_res);
+    if (flag)
+    {
+        for (int i = 0; i < NUM_RESOURCES; i++)
+        {
+            available[i] = available[i] - need[n_customer][i];
+        }
+        pthread_mutex_lock(&mutex_res);
+        print_need(n_customer);
+        printf("\t\t");
+        print_avail();
+        printf("\t\tSafe\nRequest Granted.\n\n");
+        sleep(1);
+        pthread_mutex_unlock(&mutex_res);
+        return true;
+    }
+    else
+    {
+        pthread_mutex_lock(&mutex_res);
+        print_need(n_customer);
+        printf("\t\t");
+        print_avail();
+        printf("\t\tNot Safe\nRequest Denied.\n\n");
+        sleep(1);
+        pthread_mutex_unlock(&mutex_res);
+        return false;
+    }
+}
+
+void release_res(int n_customer)
+{
+    pthread_mutex_lock(&mutex_res);
+    for (int i = 0; i < NUM_RESOURCES; i++)
+    {
+        available[i] = available[i] + need[n_customer][i];
+    }
+    printf("Customer: %d\n-------------\n", n_customer + 1);
+    printf("\tRelease\t\tAvailable\n\t");
+    print_need(n_customer);
+    printf("\t\t");
+    print_avail();
+    printf("\n\n");
+    pthread_mutex_unlock(&mutex_res);
+}
+void generate_grid()
+{
+    for (int i = 0; i < NUM_CUSTOMERS; i++)
+    {
+        for (int j = 0; j < NUM_RESOURCES; j++)
+        {
+            maximum[i][j] = rand() % available[j];
+        }
+    }
+}
+
+void generate_allocate_matrix()
+{
+    for (int i = 0; i < NUM_CUSTOMERS; i++)
+    {
+        for (int j = 0; j < NUM_RESOURCES; j++)
+        {
+            if (maximum[i][j] == 0)
+            {
+                allocation[i][j] = 0;
+            }
+            else
+            {
+                allocation[i][j] = rand() % maximum[i][j];
+            }
+        }
+    }
+}
+
+void subtractor()
+{
+    for (int i = 0; i < NUM_CUSTOMERS; i++)
+    {
+        for (int j = 0; j < NUM_RESOURCES; j++)
+        {
+            need[i][j] = maximum[i][j] - allocation[i][j];
+        }
+    }
+}
+
+void print_matrix(int arr[NUM_CUSTOMERS][NUM_RESOURCES])
+{
+    for (int i = 0; i < NUM_CUSTOMERS; i++)
+    {
+        for (int j = 0; j < NUM_RESOURCES; j++)
+        {
+            printf("%d ", arr[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void print_need(int n_customer)
+{
+    for (int i = 0; i < NUM_RESOURCES; i++)
+    {
+        printf("%d ", need[n_customer][i]);
+    }
+}
+
+void print_avail()
+{
+    for (int i = 0; i < NUM_RESOURCES; i++)
+    {
+        printf("%d ", available[i]);
+    }
 }
